@@ -21,18 +21,18 @@ varGet() {
   touch ${FILE}
 
   # Remove variable
-  local EXISTS=$(eval '[[ ! -z "${'${NAME}'+x}" ]] && echo true || echo false')
+  local EXISTS=$(eval '[[ ! -z "${'"${NAME}"'+x}" ]] && echo true || echo false')
   if [ "${EXISTS}" == false ];then
-    eval 'unset ${'${NAME}'}'
+    eval 'unset ${'"${NAME}"'}'
   fi
 
   # Eval whole file.
   _wexLoadVariables
   # Is defined or not, even empty value.
-  local EXISTS=$(eval '[[ ! -z "${'${NAME}'+x}" ]] && echo true || echo false')
+  local EXISTS=$(eval '[[ ! -z "${'"${NAME}"'+x}" ]] && echo true || echo false')
 
   # Get value
-  local VALUE=$(eval 'echo ${'${NAME}'}')
+  local VALUE=$(eval 'echo ${'"${NAME}"'}')
   local OUTPUT=${VALUE}
 
   # Value is empty, use default.
@@ -69,9 +69,16 @@ varGet() {
   fi
 
   # Value has changed or is not saved.
-  if [ "${OUTPUT}" != "${VALUE}" ] || [ ${EXISTS} == false ];then
+  if [ "${OUTPUT}" != "" ] && { [ "${OUTPUT}" != "${VALUE}" ] || [ "${EXISTS}" == "false" ]; };then
+    if [ "${NAME}" = "testVarMissing" ];then
+      # Store value.
+      echo "--${OUTPUT}--"
+
+      exit;
+    fi
+
     # Store value.
-    wex var/set -n="${NAME}" -v="$(printf "%q" "${OUTPUT}")" -f=${FILE}
+    wex var/set -n="${NAME}" -v="$(printf "%q" "${OUTPUT}")" -f="${FILE}"
   fi
 
   echo "${OUTPUT}"
